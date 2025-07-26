@@ -9,7 +9,7 @@ pipeline {
     stage('Checkout') {
       steps {
         sh 'ls'
-        git branch: 'main', url: 'https://github.com/assafaftaf/hashtag1.git'
+        git branch: 'main', url: 'https://github.com/assafaftaf/whatsapp-bot-full-folder.git'
         sh 'ls'
       }
     }
@@ -17,6 +17,7 @@ pipeline {
     stage('Permissions') {
       steps {
         sh 'chmod +x hello.sh'
+        sh 'ls'
       }
     }
 
