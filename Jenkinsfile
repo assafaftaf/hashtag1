@@ -9,6 +9,7 @@ pipeline {
     stage('Checkout') {
       steps {
         sh 'ls'
+        sh 'creating MR'
         git branch: 'main', url: 'https://github.com/assafaftaf/whatsapp-bot-full-folder.git'
         sh 'ls'
       }
