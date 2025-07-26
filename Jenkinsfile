@@ -8,9 +8,9 @@ pipeline {
   stages {
     stage('Checkout') {
       steps {
-        ls
+        sh 'ls'
         git 'https://github.com/assafaftaf/hashtag1.git'
-        ls
+        sh 'ls'
       }
     }
 
