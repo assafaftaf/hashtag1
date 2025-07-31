@@ -1,43 +1,19 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    GREETING = 'שלום אסף'
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        sh 'ls'
-        sh 'creating MR'
-        git branch: 'main', url: 'https://github.com/assafaftaf/whatsapp-bot-full-folder.git'
-        sh 'ls'
-      }
+    parameters {
+        string(name: 'GREETING', defaultValue: 'Hello', description: 'Greeting message')
+        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Run unit tests?')
+        choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'prod'], description: 'Target environment')
     }
 
-    stage('Permissions') {
-      steps {
-        sh 'chmod +x hello.sh'
-        sh 'ls'
-      }
+    stages {
+        stage('Print Parameters') {
+            steps {
+                echo "GREETING: ${params.GREETING}"
+                echo "RUN_TESTS: ${params.RUN_TESTS}"
+                echo "ENVIRONMENT: ${params.ENVIRONMENT}"
+            }
+        }
     }
-
-    stage('Run Script') {
-      steps {
-        sh './hello.sh'
-      }
-    }
-
-    stage('Print Env') {
-      steps {
-        echo "⚡️ ${env.GREETING}"
-      }
-    }
-  }
-
-  post {
-    always {
-      echo '🚀 Pipeline Completed'
-    }
-  }
 }
