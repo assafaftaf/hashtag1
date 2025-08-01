@@ -28,7 +28,7 @@ pipeline {
     stage('dockerrize') {
       steps {
         sh 'docker --help'
-        docker
+        // docker
       }
     }
   }
