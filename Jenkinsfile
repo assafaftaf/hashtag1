@@ -1,17 +1,11 @@
 pipeline {
-    agent any
-
-    triggers {
-        githubPullRequest() // Requires GitHub plugin
+    agent {
+        docker { image 'node:22.17.1-alpine3.22' }
     }
-
     stages {
-        stage('Build') {
-            when {
-                changeRequest() // Only run on PRs
-            }
+        stage('Test') {
             steps {
-                echo "Building PR #${env.CHANGE_ID} from ${env.CHANGE_BRANCH}"
+                sh 'node --eval "console.log(process.platform,process.env.CI)"'
             }
         }
     }
