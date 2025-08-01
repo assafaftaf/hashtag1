@@ -25,7 +25,6 @@ pipeline {
         echo "⚡️ ${env.GREETING}"
       }
     }
-  }
     stage('dockerrize') {
       steps {
         sh 'docker --help'
