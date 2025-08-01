@@ -6,13 +6,6 @@ pipeline {
   }
 
   stages {
-    stage('Checkout') {
-      steps {
-        sh 'ls'
-        git branch: 'main', url: 'https://github.com/assafaftaf/whatsapp-bot-full-folder.git'
-        sh 'ls'
-      }
-    }
 
     stage('Permissions') {
       steps {
@@ -33,7 +26,13 @@ pipeline {
       }
     }
   }
-
+    stage('dockerrize') {
+      steps {
+        sh 'docker --help'
+        docker
+      }
+    }
+  }
   post {
     always {
       echo '🚀 Pipeline Completed'
