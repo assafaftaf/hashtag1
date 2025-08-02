@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 30-Day Jenkins Learning Plan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Slate Gray & Sky Blue -->
+    <!-- Application Structure Plan: The application is structured as an interactive roadmap. A header provides context, followed by a dynamic progress tracking section (progress bar and a donut chart). The core content is organized into three tabs representing the learning phases (Foundations, Intermediate, Advanced) from the source report. This tabbed structure prevents overwhelming the user and allows them to focus on one phase at a time. Each phase contains a grid of clickable "day" cards. Clicking a card opens a modal with detailed topics, and a checkbox on each card allows users to track their progress. This design transforms a static article into an engaging, goal-oriented learning tool, enhancing user motivation and comprehension. -->
+    <!-- Visualization & Content Choices: Report Info: 30-day learning schedule. Goal: Organize, inform, track progress. Viz/Presentation: Interactive timeline with tabs for phases and cards for daily topics. A progress bar and a Chart.js donut chart visualize completion. Interaction: Clicking tabs filters content. Clicking cards reveals details in a modal. Checkboxes update progress state. Justification: This structure makes the dense learning plan digestible and adds motivation through visual feedback on progress. The donut chart provides an immediate, clear summary of completed vs. remaining tasks. Library/Method: HTML/Tailwind for layout, Vanilla JS for interactivity, Chart.js for the donut chart. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+        }
+        .tab-active {
+            border-color: #0ea5e9; /* sky-500 */
+            color: #0ea5e9; /* sky-500 */
+            font-weight: 600;
+        }
+        .card-complete {
+            border-left-color: #22c55e; /* green-500 */
+            background-color: #f0fdf4; /* green-50 */
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        .progress-bar-fill {
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="text-slate-800">
+
+    <div id="app" class="container mx-auto p-4 sm:p-6 md:p-8 max-w-7xl">
+
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-slate-900">Interactive 30-Day Jenkins Learning Plan</h1>
+            <p class="mt-2 text-lg text-slate-600">Your personal roadmap to mastering Jenkins, from fundamentals to advanced skills.</p>
+        </header>
+
+        <main>
+            <section id="progress-section" class="bg-white p-6 rounded-xl shadow-md mb-8">
+                <h2 class="text-xl font-semibold mb-4 text-slate-800">Your Progress</h2>
+                <div class="flex flex-col md:flex-row items-center gap-6">
+                    <div class="w-full md:w-2/3">
+                        <div class="flex justify-between mb-1">
+                            <span class="text-base font-medium text-sky-700">Learning Journey</span>
+                            <span id="progress-text" class="text-sm font-medium text-sky-700">0% Complete</span>
+                        </div>
+                        <div class="w-full bg-slate-200 rounded-full h-4">
+                            <div id="progress-bar" class="bg-sky-500 h-4 rounded-full progress-bar-fill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                    <div class="w-full md:w-1/3 flex justify-center chart-container relative h-48 md:h-40 max-w-xs mx-auto">
+                        <canvas id="progress-chart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section id="learning-plan" class="bg-white p-4 sm:p-6 rounded-xl shadow-md">
+                 <div class="mb-6 border-b border-slate-200">
+                    <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                        <button id="tab-phase-1" class="tab-button tab-active whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Phase 1: Foundations</button>
+                        <button id="tab-phase-2" class="tab-button text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Phase 2: Intermediate</button>
+                        <button id="tab-phase-3" class="tab-button text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">Phase 3: Advanced</button>
+                    </nav>
+                </div>
+
+                <div id="plan-content">
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="details-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b">
+                <h3 id="modal-title" class="text-xl font-semibold"></h3>
+                <button id="modal-close" class="text-slate-500 hover:text-slate-800">&times;</button>
+            </div>
+            <div id="modal-body" class="p-6 overflow-y-auto">
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const learningData = [
+                {
+                    phase: 1,
+                    day: "Days 1-3",
+                    title: "Introduction to Jenkins",
+                    completed: false,
+                    details: `
+                        <p class="mb-2">Understand the core concepts that form the foundation of modern software delivery.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li>What is DevOps? Principles of communication, collaboration, and integration.</li>
+                            <li>What is Continuous Integration (CI) and Continuous Delivery (CD)?</li>
+                            <li>What is Jenkins and its role as an automation server?</li>
+                            <li>Setting up Jenkins: Installation and initial configuration.</li>
+                        </ul>`
+                },
+                {
+                    phase: 1,
+                    day: "Days 4-6",
+                    title: "Jenkins Basics",
+                    completed: false,
+                    details: `
+                        <p class="mb-2">Get familiar with the Jenkins user interface and fundamental components.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li>Jenkins Dashboard Overview: Navigating the main UI.</li>
+                            <li>Creating and managing jobs (Freestyle projects).</li>
+                            <li>Understanding the importance of Jenkins plugins.</li>
+                        </ul>`
+                },
+                {
+                    phase: 1,
+                    day: "Days 7-10",
+                    title: "Setting Up a Build Job",
+                    completed: false,
+                    details: `
+                        <p class="mb-2">Create your first automated build process by integrating with a version control system.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li>Configuring Source Code Management (e.g., Git).</li>
+                            <li>Defining build triggers (e.g., Poll SCM, Webhooks).</li>
+                            <li>Adding build steps (e.g., executing shell scripts or Maven goals).</li>
+                            <li>Reviewing build results and console output.</li>
+                        </ul>`
+                },
+                {
+                    phase: 2,
+                    day: "Days 11-14",
+                    title: "Pipeline Basics",
+                    completed: false,
+                    details: `
+                        <p class="mb-2">Move from UI-based jobs to defining your build process as code.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li>What are Jenkins Pipelines? (Pipeline-as-Code)</li>
+                            <li>Creating a simple pipeline using a Jenkinsfile.</li>
+                            <li>Understanding Declarative Pipeline syntax (pipeline, agent, stages, steps).</li>
+                        </ul>`
+                },
+                {
+                    phase: 2,
+                    day: "Days 15-17",
+                    title: "Parameterized Builds",
+                    completed: false,
+                    details: `
+                        <p class="mb-2">Make your pipelines more flexible by accepting user input.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li>Adding parameters to your pipelines (e.g., string, boolean, choice).</li>
+                            <li>Using parameters within your pipeline script.</li>
+                            <li>Triggering builds with specific parameters.</li>
+                        </ul>`
+                },
+                {
+                    phase: 2,
+                    day: "Days 18-20",
+                    title: "Automating Tests with Jenkins",
+                    completed: false,
+                    details: `
+                        <p class="mb-2">Integrate automated testing into your CI process to ensure code quality.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li>Integrating testing frameworks (like JUnit or PyTest).</li>
+                            <li>Configuring automated test jobs or stages in a pipeline.</li>
+                            <li>Analyzing and publishing test results and reports.</li>
+                        </ul>`
+                },
+                {
+                    phase: 3,
+                    day: "Days 21-23",
+                    title: "Continuous Deployment with Jenkins",
+                    completed: false,
+                    details: `
+                        <p class="mb-2">Automate the deployment of your application to various environments.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li>Setting up deployment jobs/stages.</li>
+                            <li>Automating deployments to staging and production environments.</li>
+                            <li>Strategies for rollbacks and handling deployment failures.</li>
+                        </ul>`
+                },
+                {
+                    phase: 3,
+                    day: "Days 24-26",
+                    title: "Integration with Other Tools",
+                    completed: false,
+                    details: `
+                        <p class="mb-2">Expand the power of Jenkins by connecting it to the broader DevOps ecosystem.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li>Integrating with Docker for containerized builds.</li>
+                            <li>Connecting with artifact repositories like Nexus or Artifactory.</li>
+                            <li>Sending notifications via Slack or email.</li>
+                        </ul>`
+                },
+                {
+                    phase: 3,
+                    day: "Days 27-29",
+                    title: "Managing Jenkins Nodes",
+                    completed: false,
+                    details: `
+                        <p class="mb-2">Scale your Jenkins environment to handle larger workloads.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li>Setting up Jenkins agents (nodes) for distributed builds.</li>
+                            <li>Configuring nodes and assigning jobs to specific agents.</li>
+                            <li>Managing node health and resource allocation.</li>
+                        </ul>`
+                },
+                {
+                    phase: 3,
+                    day: "Day 30",
+                    title: "Monitoring and Logging",
+                    completed: false,
+                    details: `
+                        <p class="mb-2">Ensure your Jenkins instance is running smoothly and efficiently.</p>
+                        <ul class="list-disc list-inside space-y-2 text-slate-700">
+                            <li>Monitoring Jenkins performance and resource usage.</li>
+                            <li>Setting up alerts and notifications for system health.</li>
+                            <li>Analyzing Jenkins logs for troubleshooting.</li>
+                        </ul>`
+                }
+            ];
+
+            let currentPhase = 1;
+            let chartInstance = null;
+
+            const planContent = document.getElementById('plan-content');
+            const modal = document.getElementById('details-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalBody = document.getElementById('modal-body');
+            const modalClose = document.getElementById('modal-close');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const progressBar = document.getElementById('progress-bar');
+            const progressText = document.getElementById('progress-text');
+
+            const renderContent = () => {
+                planContent.innerHTML = '';
+                const phaseData = learningData.filter(item => item.phase === currentPhase);
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
+
+                phaseData.forEach((item, index) => {
+                    const card = document.createElement('div');
+                    card.className = `p-4 border-l-4 rounded-r-lg shadow-sm cursor-pointer hover:shadow-lg transition-shadow duration-300 ${item.completed ? 'card-complete border-green-500' : 'border-slate-300'}`;
+                    card.dataset.index = learningData.indexOf(item);
+
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="text-sm font-semibold text-sky-600">${item.day}</p>
+                                <h3 class="text-lg font-semibold mt-1 text-slate-800">${item.title}</h3>
+                            </div>
+                            <div class="flex items-center h-full ml-4">
+                                <input type="checkbox" data-index="${learningData.indexOf(item)}" class="h-5 w-5 rounded border-gray-300 text-sky-600 focus:ring-sky-500" ${item.completed ? 'checked' : ''}>
+                            </div>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+                planContent.appendChild(grid);
+            };
+
+            const updateProgress = () => {
+                const completedCount = learningData.filter(item => item.completed).length;
+                const totalCount = learningData.length;
+                const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
+
+                progressBar.style.width = `${percentage}%`;
+                progressText.textContent = `${percentage}% Complete`;
+
+                if (chartInstance) {
+                    chartInstance.data.datasets[0].data = [completedCount, totalCount - completedCount];
+                    chartInstance.update();
+                }
+            };
+           
+            const createChart = () => {
+                const ctx = document.getElementById('progress-chart').getContext('2d');
+                const completedCount = learningData.filter(item => item.completed).length;
+                const totalCount = learningData.length;
+
+                chartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Completed', 'Remaining'],
+                        datasets: [{
+                            data: [completedCount, totalCount - completedCount],
+                            backgroundColor: ['#0ea5e9', '#e2e8f0'],
+                            borderColor: ['#f8fafc', '#f8fafc'],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                enabled: true
+                            }
+                        }
+                    }
+                });
+            };
+
+            planContent.addEventListener('click', (e) => {
+                const card = e.target.closest('.cursor-pointer');
+                if (card && !e.target.matches('input[type="checkbox"]')) {
+                    const index = card.dataset.index;
+                    const item = learningData[index];
+                    modalTitle.textContent = `${item.day}: ${item.title}`;
+                    modalBody.innerHTML = item.details;
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                }
+
+                if (e.target.matches('input[type="checkbox"]')) {
+                    const index = e.target.dataset.index;
+                    learningData[index].completed = e.target.checked;
+                    renderContent();
+                    updateProgress();
+                }
+            });
+
+            modalClose.addEventListener('click', () => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            });
+           
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            });
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    tabButtons.forEach(btn => {
+                        btn.classList.remove('tab-active');
+                        btn.classList.add('text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                    });
+                    button.classList.add('tab-active');
+                    button.classList.remove('text-slate-500', 'hover:text-slate-700', 'hover:border-slate-300');
+                    currentPhase = parseInt(button.id.split('-')[2]);
+                    renderContent();
+                });
+            });
+
+            renderContent();
+            createChart();
+            updateProgress();
+        });
+    </script>
+</body>
+</html>
