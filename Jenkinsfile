@@ -4,6 +4,7 @@ pipeline {
     }
     environment {
         HUB_PASSWORD = credentials('5c377826-722d-4505-a534-7e2745aa216c') // ID from Jenkins credentials
+        DOCKER_USERNAME = "assaf888"
     }
     stages {
         stage('build') {
@@ -16,7 +17,7 @@ pipeline {
             steps {
                 echo "🔐 Logging into Docker Hub and pushing image"
 
-                sh 'echo "$HUB_PASSWORD" | docker login -u assaf888 --password-stdin'
+                sh "echo \"$HUB_PASSWORD\" | docker login -u \"$DOCKER_USERNAME\" --password-stdin"
                 sh '''
                     docker push assaf888/learn_jenkins
                 '''
