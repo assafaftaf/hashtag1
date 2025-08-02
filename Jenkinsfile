@@ -15,7 +15,7 @@ pipeline {
         stage('push') {
             steps {
                 echo "Logging into Docker registry"
-                echo "HUB_PASSWORD"
+                echo "$HUB_PASSWORD"
                 sh '''
                     echo $HUB_PASSWORD | docker login -u assaf888 --password-stdin
                     docker push learn_jenkins
