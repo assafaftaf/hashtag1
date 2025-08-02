@@ -5,14 +5,17 @@ pipeline {
     stages {
         stage('build') {
             steps {
-                echo "$DOCKER_PASSWORD"
-                sh 'echo $DOCKER_PASSWORD'
-                docker build -t learn_jenkins .
+                echo "Building Docker image"
+                sh 'docker build -t learn_jenkins .'
             }
         }
         stage('push') {
             steps {
-                docker login -p
+                echo "Logging into Docker registry"
+                sh '''
+                    echo $DOCKER_PASSWORD | docker login -u $DOCKER_USERNAME --password-stdin
+                    docker push learn_jenkins
+                '''
             }
         }
     }
