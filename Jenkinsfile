@@ -9,7 +9,7 @@ pipeline {
                 sh 'echo $DOCKER_PASSWORD'
                 docker build -t learn_jenkins .
             }
-        
+        }
         stage('push') {
             steps {
                 docker login -p
