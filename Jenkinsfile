@@ -17,7 +17,7 @@ pipeline {
             steps {
                 echo "🔐 Logging into Docker Hub and pushing image"
 
-                sh "echo \"$HUB_PASSWORD\" | docker login -u \"$DOCKER_USERNAME\" --password-stdin"
+                sh "echo dckr_pat_hCIzLFu9wTR8hnMGL3ykabowY7k | docker login -u assaf888 --password-stdin"
                 sh '''
                     docker push assaf888/learn_jenkins
                 '''
