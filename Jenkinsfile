@@ -17,7 +17,7 @@ pipeline {
                 echo "Logging into Docker registry"
                 echo "$HUB_PASSWORD"
                 sh '''
-                    docker login -u assaf888 --password  $HUB_PASSWORD
+                    echp "$HUB_PASSWORD" | docker login -u assaf888 --password-stdin  
                     docker push learn_jenkins
                 '''
             }
