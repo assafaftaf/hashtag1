@@ -15,6 +15,5 @@ pipeline {
                 docker login -p
             }
         }
-        }
     }
 }
