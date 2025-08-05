@@ -1,27 +1,47 @@
 pipeline {
-    agent {
-        docker { image 'docker:24.0.7-dind' }
+    agent any
+
+    // Optionally use triggers if webhooks aren't set up
+    triggers {
+        // githubPush()  // <-- Not needed if using webhook
     }
-    environment {
-        HUB_PASSWORD = credentials('5c377826-722d-4505-a534-7e2745aa216c') // ID from Jenkins credentials
-        DOCKER_USERNAME = "assaf888"
+
+    // Only run the pipeline for PRs
+    options {
+        skipDefaultCheckout()
     }
+
     stages {
-        stage('build') {
+        stage('Check if this is a PR') {
+            when {
+                expression {
+                    return env.CHANGE_ID != null
+                }
+            }
             steps {
-                echo "Building Docker image"
-                sh 'docker build -t assaf888/learn_jenkins .'
+                echo "This is a Pull Request"
+                echo "PR ID: ${env.CHANGE_ID}"
+                echo "From branch: ${env.CHANGE_BRANCH}"
+                echo "Target branch: ${env.CHANGE_TARGET}"
             }
         }
-        stage('push') {
-            steps {
-                echo "🔐 Logging into Docker Hub and pushing image"
 
-                sh "echo dckr_pat_hCIzLFu9wTR8hnMGL3ykabowY7k | docker login -u assaf888 --password-stdin"
-                sh '''
-                    docker push assaf888/learn_jenkins
-                '''
+        stage('Build and Test') {
+            when {
+                expression {
+                    return env.CHANGE_ID != null
+                }
             }
+            steps {
+                echo "Running build/test steps for PR #${env.CHANGE_ID}"
+                // Add your real build/test steps here
+            }
+        }
+    }
+
+    post {
+        always {
+            echo "Finished build for ${env.JOB_NAME} #${env.BUILD_NUMBER}"
         }
     }
 }
