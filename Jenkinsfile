@@ -13,11 +13,6 @@ pipeline {
 
     stages {
         stage('Check if this is a PR') {
-            when {
-                expression {
-                    return env.CHANGE_ID != null
-                }
-            }
             steps {
                 echo "This is a Pull Request"
                 echo "PR ID: ${env.CHANGE_ID}"
