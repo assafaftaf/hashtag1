@@ -3,7 +3,7 @@ pipeline {
 
     // Optionally use triggers if webhooks aren't set up
     triggers {
-        // githubPush()  // <-- Not needed if using webhook
+        githubPush()  // <-- Not needed if using webhook
     }
 
     // Only run the pipeline for PRs
